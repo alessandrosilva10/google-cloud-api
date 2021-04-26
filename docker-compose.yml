@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./web
+    command: gunicorn --bind 0.0.0.0:5000 app:app
+    volumes:
+      - ./web/:/usr/src/app/
+    expose:
+      - 5000
+    env_file:
+      - ./web/.env.dev
+  db:
+    image: postgres:12-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=aifood
+    ports:
+      - "5432:5432"
+    expose:
+      - 5432
+  nginx:
+    build: ./web/nginx
+    ports:
+      - 1337:80
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
